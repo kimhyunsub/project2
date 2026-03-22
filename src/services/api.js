@@ -17,6 +17,34 @@ function getErrorMessage(error, fallbackMessage) {
   );
 }
 
+function normalizeLoginErrorMessage(error, employeeCode, password) {
+  if (!employeeCode || !password) {
+    return "사번과 비밀번호를 입력해 주세요.";
+  }
+
+  const status = error?.response?.status;
+  const serverMessage = error?.response?.data?.message;
+  const fallbackMessage = getErrorMessage(error, "로그인에 실패했습니다.");
+
+  if (typeof serverMessage === "string" && serverMessage.includes("이미 다른 단말이 등록")) {
+    return "이 계정은 다른 단말에 이미 등록되어 있습니다. 관리자에게 단말 초기화를 요청한 뒤 다시 로그인해 주세요.";
+  }
+
+  if (typeof serverMessage === "string" && serverMessage.includes("사번 또는 비밀번호")) {
+    return "사번 또는 비밀번호가 올바르지 않습니다. 입력값을 다시 확인해 주세요.";
+  }
+
+  if (status === 401 && typeof serverMessage === "string" && serverMessage.trim()) {
+    return serverMessage;
+  }
+
+  if (typeof status === "number" && status >= 500) {
+    return "서버 오류로 로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+  }
+
+  return fallbackMessage;
+}
+
 function getUserPayload(data, employeeCode) {
   return {
     id: data?.employeeId,
@@ -92,10 +120,7 @@ export async function login({ employeeCode, password, deviceId, deviceName }) {
       user: getUserPayload(response.data, employeeCode),
     };
   } catch (error) {
-    if (!employeeCode || !password) {
-      throw new Error("사번과 비밀번호를 입력해 주세요.");
-    }
-    throw new Error(getErrorMessage(error, "로그인에 실패했습니다."));
+    throw new Error(normalizeLoginErrorMessage(error, employeeCode, password));
   }
 }
 

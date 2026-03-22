@@ -441,6 +441,11 @@ export default function App() {
           <Text style={styles.subtitle}>
             {attendanceMeta.companyName || companySetting.companyName || COMPANY_NAME} 출퇴근 서비스입니다. 로그인 후 브라우저에서 현재 위치를 확인하고 출근과 퇴근을 기록해 보세요. 로그인 상태는 같은 단말에서 최대 1년 유지됩니다.
           </Text>
+          {errorMessage ? (
+            <View style={styles.authErrorBox}>
+              <Text style={styles.authErrorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
           <TextInput
             autoCapitalize="none"
             onChangeText={setEmployeeCode}
@@ -628,6 +633,20 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
     elevation: 3,
+  },
+  authErrorBox: {
+    backgroundColor: "#fff1f2",
+    borderColor: "#fecdd3",
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  authErrorText: {
+    color: "#be123c",
+    fontSize: 14,
+    lineHeight: 20,
   },
   title: {
     color: "#172033",
