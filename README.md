@@ -104,7 +104,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\deploy-prod.ps1
 운영 서버 주소를 바꾸려면:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\deploy-prod.ps1 -ApiBaseUrl "http://api.hsft.io.kr/api" -Port 4173
+powershell -ExecutionPolicy Bypass -File .\scripts\deploy-prod.ps1 -ApiBaseUrl "https://api.hsft.io.kr/api" -Port 4173
 ```
 
 스크립트 동작:

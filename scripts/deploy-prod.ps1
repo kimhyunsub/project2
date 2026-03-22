@@ -1,7 +1,7 @@
 Param(
     [string]$Branch = "main",
     [switch]$SkipPull,
-    [string]$ApiBaseUrl = "http://api.hsft.io.kr/api",
+    [string]$ApiBaseUrl = "https://api.hsft.io.kr/api",
     [int]$Port = 4173
 )
 
