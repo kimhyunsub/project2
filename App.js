@@ -608,6 +608,21 @@ export default function App() {
     }
   }
 
+  function handleBackToLogin() {
+    clearAuth();
+    setAuth(null);
+    setErrorMessage("");
+    setCurrentPasswordInput("");
+    setNewPasswordInput("");
+    setConfirmPasswordInput("");
+    setAttendance(INITIAL_STATUS);
+    setAttendanceMeta({
+      attendanceDate: null,
+      companyName: companySetting.companyName || COMPANY_NAME,
+      status: null,
+    });
+  }
+
   async function handleCheckIn() {
     if (!currentLocation || !auth?.token) {
       return;
@@ -767,6 +782,13 @@ export default function App() {
             ) : (
               <Text style={styles.primaryButtonText}>비밀번호 변경</Text>
             )}
+          </Pressable>
+          <Pressable
+            disabled={changingPassword}
+            onPress={handleBackToLogin}
+            style={[styles.backButton, changingPassword && styles.buttonDisabled]}
+          >
+            <Text style={styles.backButtonText}>뒤로가기</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -1181,6 +1203,20 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "800",
+  },
+  backButton: {
+    alignItems: "center",
+    borderColor: "#cfd8e6",
+    borderRadius: 18,
+    borderWidth: 1,
+    justifyContent: "center",
+    marginTop: 12,
+    minHeight: 52,
+  },
+  backButtonText: {
+    color: "#475569",
+    fontSize: 15,
+    fontWeight: "700",
   },
   checkInButton: {
     alignItems: "center",
