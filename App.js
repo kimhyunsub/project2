@@ -32,10 +32,13 @@ import {
   login,
 } from "./src/services/api";
 import {
+  clearEmployeeCode,
   clearAuth,
   getDeviceName,
   getOrCreateDeviceId,
+  loadEmployeeCode,
   loadAuth,
+  saveEmployeeCode,
   saveAuth,
 } from "./src/utils/authStorage";
 import { getDistanceInMeters } from "./src/utils/location";
@@ -230,8 +233,9 @@ function isAuthErrorMessage(message) {
 }
 
 export default function App() {
-  const [employeeCode, setEmployeeCode] = useState("EMP001");
-  const [password, setPassword] = useState("password1234");
+  const [employeeCode, setEmployeeCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberEmployeeCode, setRememberEmployeeCode] = useState(false);
   const [auth, setAuth] = useState(null);
   const [currentPasswordInput, setCurrentPasswordInput] = useState("");
   const [newPasswordInput, setNewPasswordInput] = useState("");
@@ -259,6 +263,12 @@ export default function App() {
   });
 
   useEffect(() => {
+    const savedEmployeeCode = loadEmployeeCode();
+    if (savedEmployeeCode) {
+      setEmployeeCode(savedEmployeeCode);
+      setRememberEmployeeCode(true);
+    }
+
     const savedAuth = loadAuth();
     if (savedAuth?.token) {
       setAuth(savedAuth);
@@ -532,6 +542,13 @@ export default function App() {
         deviceId: getOrCreateDeviceId(),
         deviceName: getDeviceName(),
       });
+
+      if (rememberEmployeeCode) {
+        saveEmployeeCode(employeeCode);
+      } else {
+        clearEmployeeCode();
+      }
+
       setAuth(response);
       saveAuth(response);
       setCurrentPasswordInput("");
@@ -554,6 +571,20 @@ export default function App() {
       showError("로그인 실패", error.message || "다시 시도해 주세요.");
     } finally {
       setLoadingLogin(false);
+    }
+  }
+
+  function handleToggleRememberEmployeeCode() {
+    const nextValue = !rememberEmployeeCode;
+    setRememberEmployeeCode(nextValue);
+
+    if (!nextValue) {
+      clearEmployeeCode();
+      return;
+    }
+
+    if (employeeCode.trim()) {
+      saveEmployeeCode(employeeCode);
     }
   }
 
@@ -726,6 +757,15 @@ export default function App() {
             style={styles.input}
             value={password}
           />
+          <Pressable
+            onPress={handleToggleRememberEmployeeCode}
+            style={styles.checkboxRow}
+          >
+            <View style={[styles.checkbox, rememberEmployeeCode && styles.checkboxChecked]}>
+              {rememberEmployeeCode ? <Text style={styles.checkboxMark}>✓</Text> : null}
+            </View>
+            <Text style={styles.checkboxLabel}>아이디 저장</Text>
+          </Pressable>
           <Pressable
             disabled={loadingLogin}
             onPress={handleLogin}
@@ -1019,6 +1059,36 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 16,
     paddingVertical: 15,
+  },
+  checkboxRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 14,
+  },
+  checkbox: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#cbd5e1",
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 22,
+    justifyContent: "center",
+    width: 22,
+  },
+  checkboxChecked: {
+    backgroundColor: "#1463ff",
+    borderColor: "#1463ff",
+  },
+  checkboxMark: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  checkboxLabel: {
+    color: "#475569",
+    fontSize: 14,
+    fontWeight: "600",
   },
   container: {
     flex: 1,

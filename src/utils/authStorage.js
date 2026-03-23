@@ -1,5 +1,6 @@
 const AUTH_STORAGE_KEY = "attendance-auth";
 const DEVICE_ID_STORAGE_KEY = "attendance-device-id";
+const SAVED_EMPLOYEE_CODE_STORAGE_KEY = "attendance-saved-employee-code";
 
 function isWebStorageAvailable() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -75,4 +76,34 @@ export function clearAuth() {
   }
 
   window.localStorage.removeItem(AUTH_STORAGE_KEY);
+}
+
+export function saveEmployeeCode(employeeCode) {
+  if (!isWebStorageAvailable()) {
+    return;
+  }
+
+  const normalizedEmployeeCode = employeeCode?.trim();
+  if (!normalizedEmployeeCode) {
+    window.localStorage.removeItem(SAVED_EMPLOYEE_CODE_STORAGE_KEY);
+    return;
+  }
+
+  window.localStorage.setItem(SAVED_EMPLOYEE_CODE_STORAGE_KEY, normalizedEmployeeCode);
+}
+
+export function loadEmployeeCode() {
+  if (!isWebStorageAvailable()) {
+    return "";
+  }
+
+  return window.localStorage.getItem(SAVED_EMPLOYEE_CODE_STORAGE_KEY) || "";
+}
+
+export function clearEmployeeCode() {
+  if (!isWebStorageAvailable()) {
+    return;
+  }
+
+  window.localStorage.removeItem(SAVED_EMPLOYEE_CODE_STORAGE_KEY);
 }
