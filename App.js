@@ -751,31 +751,6 @@ export default function App() {
             ? companySetting.noticeMessage
             : "등록된 공지사항이 없습니다."}
         </Text>
-        {DEMO_MODE ? (
-          <Text style={styles.demoText}>
-            데모 모드가 활성화되어 있어 백엔드 없이 로그인과 출퇴근 테스트가 가능합니다.
-          </Text>
-        ) : null}
-        {Platform.OS === "web" ? (
-          <Text style={styles.helperRow}>
-            웹 서비스 모드: iPhone Safari 또는 데스크톱 브라우저에서 바로 사용할 수 있습니다.
-          </Text>
-        ) : null}
-        {attendanceMeta.status ? (
-          <Text style={styles.helperRow}>상태: {attendanceMeta.status}</Text>
-        ) : null}
-        {attendanceMeta.attendanceDate ? (
-          <Text style={styles.helperRow}>근무일: {attendanceMeta.attendanceDate}</Text>
-        ) : null}
-        {typeof currentLocation?.accuracyMeters === "number" ? (
-          <Text style={styles.helperRow}>위치 정확도: 약 {Math.round(currentLocation.accuracyMeters)}m</Text>
-        ) : null}
-        {auth?.expiresAt ? (
-          <Text style={styles.helperRow}>로그인 유지 만료: {new Date(auth.expiresAt).toLocaleDateString("ko-KR")}</Text>
-        ) : null}
-        <Text style={styles.helperRow}>
-          오늘 출근 {formatTime(attendance.checkedInAt)} / 퇴근 {formatTime(attendance.checkedOutAt)}
-        </Text>
 
         <Pressable
           disabled={!canCheckIn}
