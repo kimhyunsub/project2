@@ -52,6 +52,7 @@ function getUserPayload(data, employeeCode) {
     employeeCode,
     companyName: data?.companyName,
     role: data?.role,
+    passwordChangeRequired: Boolean(data?.passwordChangeRequired),
   };
 }
 
@@ -101,6 +102,7 @@ export async function login({ employeeCode, password, deviceId, deviceName }) {
         employeeCode,
         companyName: "OpenAI Seoul Office",
         role: employeeCode === "ADMIN001" ? "ADMIN" : "EMPLOYEE",
+        passwordChangeRequired: false,
       },
     };
   }
@@ -121,6 +123,32 @@ export async function login({ employeeCode, password, deviceId, deviceName }) {
     };
   } catch (error) {
     throw new Error(normalizeLoginErrorMessage(error, employeeCode, password));
+  }
+}
+
+export async function changePassword({ token, currentPassword, newPassword }) {
+  if (DEMO_MODE) {
+    return {
+      message: "데모 모드에서 비밀번호가 변경되었습니다.",
+    };
+  }
+
+  try {
+    const response = await api.post(
+      "/auth/change-password",
+      { currentPassword, newPassword },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return {
+      message: response.data?.message || "비밀번호가 변경되었습니다.",
+    };
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "비밀번호 변경에 실패했습니다."));
   }
 }
 

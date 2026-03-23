@@ -22,6 +22,7 @@ import AttendanceMap from "./src/components/AttendanceMap";
 import {
   checkIn,
   checkOut,
+  changePassword,
   DEMO_MODE,
   getCompanySetting,
   getPublicCompanySetting,
@@ -42,6 +43,29 @@ const INITIAL_STATUS = {
   checkedOutAt: null,
 };
 const MAX_LOCATION_ACCURACY_METERS = 100;
+
+function getSeoulNowInfo() {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(new Date());
+
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value])
+  );
+
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    hour: Number(values.hour || "0"),
+  };
+}
 
 function mapPositionToLocation(position) {
   return {
@@ -75,6 +99,10 @@ export default function App() {
   const [employeeCode, setEmployeeCode] = useState("EMP001");
   const [password, setPassword] = useState("password1234");
   const [auth, setAuth] = useState(null);
+  const [currentPasswordInput, setCurrentPasswordInput] = useState("");
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
   const [locationPermission, setLocationPermission] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
@@ -199,6 +227,10 @@ export default function App() {
       return undefined;
     }
 
+    if (auth.user?.passwordChangeRequired) {
+      return undefined;
+    }
+
     let active = true;
 
     async function loadTodayAttendance() {
@@ -239,6 +271,10 @@ export default function App() {
       return undefined;
     }
 
+    if (auth.user?.passwordChangeRequired) {
+      return undefined;
+    }
+
     let active = true;
 
     async function loadCompanySetting() {
@@ -272,6 +308,10 @@ export default function App() {
 
   useEffect(() => {
     if (!auth) {
+      return undefined;
+    }
+
+    if (auth.user?.passwordChangeRequired) {
       return undefined;
     }
 
@@ -322,9 +362,16 @@ export default function App() {
     });
   }, [companySetting.latitude, companySetting.longitude, currentLocation]);
 
+  const seoulNow = getSeoulNowInfo();
+  const effectiveAttendance = (
+    seoulNow.hour >= 1 &&
+    attendanceMeta.attendanceDate &&
+    attendanceMeta.attendanceDate !== seoulNow.date
+  ) ? INITIAL_STATUS : attendance;
+
   const canCheckIn =
     Boolean(auth) &&
-    !attendance.checkedInAt &&
+    !effectiveAttendance.checkedInAt &&
     !submittingAttendance &&
     typeof distance === "number" &&
     typeof currentLocation?.accuracyMeters === "number" &&
@@ -334,8 +381,8 @@ export default function App() {
   const canCheckOut =
     Boolean(auth) &&
     Boolean(currentLocation) &&
-    attendance.checkedInAt &&
-    !attendance.checkedOutAt &&
+    effectiveAttendance.checkedInAt &&
+    !effectiveAttendance.checkedOutAt &&
     !submittingAttendance &&
     typeof distance === "number" &&
     typeof currentLocation?.accuracyMeters === "number" &&
@@ -354,6 +401,9 @@ export default function App() {
       });
       setAuth(response);
       saveAuth(response);
+      setCurrentPasswordInput(password);
+      setNewPasswordInput("");
+      setConfirmPasswordInput("");
       setAttendance(INITIAL_STATUS);
       setAttendanceMeta({
         attendanceDate: null,
@@ -370,6 +420,57 @@ export default function App() {
       showError("로그인 실패", error.message || "다시 시도해 주세요.");
     } finally {
       setLoadingLogin(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    if (!auth?.token) {
+      return;
+    }
+
+    if (!currentPasswordInput || !newPasswordInput || !confirmPasswordInput) {
+      showError("비밀번호 변경 필요", "현재 비밀번호와 새 비밀번호를 모두 입력해 주세요.");
+      return;
+    }
+
+    if (newPasswordInput.length < 8) {
+      showError("비밀번호 변경 필요", "새 비밀번호는 8자 이상이어야 합니다.");
+      return;
+    }
+
+    if (newPasswordInput !== confirmPasswordInput) {
+      showError("비밀번호 변경 필요", "새 비밀번호 확인이 일치하지 않습니다.");
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+      setErrorMessage("");
+      const response = await changePassword({
+        token: auth.token,
+        currentPassword: currentPasswordInput,
+        newPassword: newPasswordInput,
+      });
+
+      const nextAuth = {
+        ...auth,
+        user: {
+          ...auth.user,
+          passwordChangeRequired: false,
+        },
+      };
+
+      setAuth(nextAuth);
+      saveAuth(nextAuth);
+      setPassword(newPasswordInput);
+      setCurrentPasswordInput("");
+      setNewPasswordInput("");
+      setConfirmPasswordInput("");
+      Alert.alert("비밀번호 변경 완료", response.message || "비밀번호가 변경되었습니다.");
+    } catch (error) {
+      showError("비밀번호 변경 실패", error.message || "잠시 후 다시 시도해 주세요.");
+    } finally {
+      setChangingPassword(false);
     }
   }
 
@@ -471,6 +572,60 @@ export default function App() {
               <ActivityIndicator color="#ffffff" />
             ) : (
               <Text style={styles.primaryButtonText}>로그인</Text>
+            )}
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (auth.user?.passwordChangeRequired) {
+    return (
+      <SafeAreaView style={styles.authContainer}>
+        <StatusBar style="dark" />
+        <View style={styles.authCard}>
+          <Text style={styles.title}>비밀번호 변경</Text>
+          <Text style={styles.subtitle}>
+            처음 로그인한 직원은 비밀번호를 먼저 변경해야 합니다. 변경이 끝나면 바로 출퇴근 기능을 사용할 수 있습니다.
+          </Text>
+          {errorMessage ? (
+            <View style={styles.authErrorBox}>
+              <Text style={styles.authErrorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
+          <TextInput
+            onChangeText={setCurrentPasswordInput}
+            placeholder="현재 비밀번호"
+            placeholderTextColor="#8c98ad"
+            secureTextEntry
+            style={styles.input}
+            value={currentPasswordInput}
+          />
+          <TextInput
+            onChangeText={setNewPasswordInput}
+            placeholder="새 비밀번호 (8자 이상)"
+            placeholderTextColor="#8c98ad"
+            secureTextEntry
+            style={styles.input}
+            value={newPasswordInput}
+          />
+          <TextInput
+            onChangeText={setConfirmPasswordInput}
+            placeholder="새 비밀번호 확인"
+            placeholderTextColor="#8c98ad"
+            secureTextEntry
+            style={styles.input}
+            value={confirmPasswordInput}
+          />
+          <Pressable
+            disabled={changingPassword}
+            onPress={handleChangePassword}
+            style={[styles.primaryButton, changingPassword && styles.buttonDisabled]}
+          >
+            {changingPassword ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text style={styles.primaryButtonText}>비밀번호 변경</Text>
             )}
           </Pressable>
         </View>
