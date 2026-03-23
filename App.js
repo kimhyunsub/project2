@@ -380,14 +380,9 @@ export default function App() {
 
   const canCheckOut =
     Boolean(auth) &&
-    Boolean(currentLocation) &&
     effectiveAttendance.checkedInAt &&
     !effectiveAttendance.checkedOutAt &&
-    !submittingAttendance &&
-    typeof distance === "number" &&
-    typeof currentLocation?.accuracyMeters === "number" &&
-    currentLocation.accuracyMeters <= MAX_LOCATION_ACCURACY_METERS &&
-    distance <= companySetting.allowedRadiusMeters;
+    !submittingAttendance;
 
   async function handleLogin() {
     try {
@@ -503,7 +498,12 @@ export default function App() {
   }
 
   async function handleCheckOut() {
-    if (!auth?.token || !currentLocation) {
+    if (!auth?.token) {
+      return;
+    }
+
+    if (!currentLocation) {
+      showError("퇴근 처리 실패", "현재 위치를 아직 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.");
       return;
     }
 
