@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -79,9 +80,9 @@ function parseNoticeMessage(message) {
     });
 }
 
-function renderNoticeInline(text, textStyle, boldStyle) {
+function renderNoticeInline(text, textStyle, boldStyle, linkStyle) {
   const parts = [];
-  const pattern = /\*\*(.+?)\*\*/g;
+  const pattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|\*\*(.+?)\*\*/g;
   let lastIndex = 0;
   let match;
 
@@ -90,15 +91,24 @@ function renderNoticeInline(text, textStyle, boldStyle) {
       parts.push({
         key: `text-${lastIndex}`,
         text: text.slice(lastIndex, match.index),
-        bold: false,
+        type: "text",
       });
     }
 
-    parts.push({
-      key: `bold-${match.index}`,
-      text: match[1],
-      bold: true,
-    });
+    if (match[1] && match[2]) {
+      parts.push({
+        key: `link-${match.index}`,
+        text: match[1],
+        url: match[2],
+        type: "link",
+      });
+    } else {
+      parts.push({
+        key: `bold-${match.index}`,
+        text: match[3],
+        type: "bold",
+      });
+    }
     lastIndex = pattern.lastIndex;
   }
 
@@ -106,7 +116,7 @@ function renderNoticeInline(text, textStyle, boldStyle) {
     parts.push({
       key: `text-tail-${lastIndex}`,
       text: text.slice(lastIndex),
-      bold: false,
+      type: "text",
     });
   }
 
@@ -114,14 +124,26 @@ function renderNoticeInline(text, textStyle, boldStyle) {
     parts.push({
       key: "text-full",
       text,
-      bold: false,
+      type: "text",
     });
   }
 
   return (
     <Text style={textStyle}>
       {parts.map((part) => (
-        <Text key={part.key} style={part.bold ? boldStyle : null}>
+        <Text
+          key={part.key}
+          onPress={
+            part.type === "link" ? () => Linking.openURL(part.url).catch(() => {}) : undefined
+          }
+          style={
+            part.type === "bold"
+              ? boldStyle
+              : part.type === "link"
+                ? linkStyle
+                : null
+          }
+        >
           {part.text}
         </Text>
       ))}
@@ -853,7 +875,8 @@ export default function App() {
                       {renderNoticeInline(
                         block.text,
                         styles.noticeBulletText,
-                        styles.noticeBoldText
+                        styles.noticeBoldText,
+                        styles.noticeLinkText
                       )}
                     </View>
                   </View>
@@ -865,7 +888,8 @@ export default function App() {
                   {renderNoticeInline(
                     block.text,
                     styles.panelDescription,
-                    styles.noticeBoldText
+                    styles.noticeBoldText,
+                    styles.noticeLinkText
                   )}
                 </View>
               );
@@ -1110,6 +1134,11 @@ const styles = StyleSheet.create({
   noticeBoldText: {
     fontWeight: "800",
     color: "#172033",
+  },
+  noticeLinkText: {
+    color: "#1463ff",
+    fontWeight: "700",
+    textDecorationLine: "underline",
   },
   helperRow: {
     color: "#7b8598",
