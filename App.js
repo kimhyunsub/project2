@@ -232,6 +232,16 @@ function isAuthErrorMessage(message) {
   return message.includes("인증") || message.includes("로그인") || message.includes("권한");
 }
 
+function getDisplayLocationName(attendanceMeta, companySetting) {
+  return (
+    attendanceMeta.workplaceName ||
+    companySetting.workplaceName ||
+    attendanceMeta.companyName ||
+    companySetting.companyName ||
+    COMPANY_NAME
+  );
+}
+
 export default function App() {
   const [employeeCode, setEmployeeCode] = useState("");
   const [password, setPassword] = useState("");
@@ -251,11 +261,13 @@ export default function App() {
   const [attendanceMeta, setAttendanceMeta] = useState({
     attendanceDate: null,
     companyName: COMPANY_NAME,
+    workplaceName: null,
     status: null,
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [companySetting, setCompanySetting] = useState({
     companyName: COMPANY_NAME,
+    workplaceName: null,
     latitude: COMPANY_LOCATION.latitude,
     longitude: COMPANY_LOCATION.longitude,
     allowedRadiusMeters: COMPANY_RADIUS_METERS,
@@ -275,6 +287,7 @@ export default function App() {
       setAttendanceMeta({
         attendanceDate: null,
         companyName: savedAuth.user?.companyName || COMPANY_NAME,
+        workplaceName: savedAuth.user?.workplaceName || null,
         status: null,
       });
     }
@@ -296,6 +309,7 @@ export default function App() {
       setAttendanceMeta((prev) => ({
         ...prev,
         companyName: nextCompanySetting.companyName || prev.companyName,
+        workplaceName: nextCompanySetting.workplaceName || null,
       }));
     }
 
@@ -390,6 +404,7 @@ export default function App() {
           setAttendanceMeta({
             attendanceDate: todayAttendance.attendanceDate,
             companyName: todayAttendance.companyName || auth.user.companyName || COMPANY_NAME,
+            workplaceName: todayAttendance.workplaceName || auth.user.workplaceName || null,
             status: todayAttendance.status,
           });
         }
@@ -431,6 +446,7 @@ export default function App() {
           setAttendanceMeta((prev) => ({
             ...prev,
             companyName: nextCompanySetting.companyName || prev.companyName,
+            workplaceName: nextCompanySetting.workplaceName || null,
           }));
         }
       } catch (error) {
@@ -558,10 +574,12 @@ export default function App() {
       setAttendanceMeta({
         attendanceDate: null,
         companyName: response.user.companyName || COMPANY_NAME,
+        workplaceName: response.user.workplaceName || null,
         status: null,
       });
       setCompanySetting({
         companyName: response.user.companyName || COMPANY_NAME,
+        workplaceName: response.user.workplaceName || null,
         latitude: COMPANY_LOCATION.latitude,
         longitude: COMPANY_LOCATION.longitude,
         allowedRadiusMeters: COMPANY_RADIUS_METERS,
@@ -650,6 +668,7 @@ export default function App() {
     setAttendanceMeta({
       attendanceDate: null,
       companyName: companySetting.companyName || COMPANY_NAME,
+      workplaceName: companySetting.workplaceName || null,
       status: null,
     });
   }
@@ -734,7 +753,7 @@ export default function App() {
         <View style={styles.authCard}>
           <Text style={styles.title}>출퇴근 체크</Text>
           <Text style={styles.subtitle}>
-            {attendanceMeta.companyName || companySetting.companyName || COMPANY_NAME} 출퇴근 서비스입니다. 로그인 후 브라우저에서 현재 위치를 확인하고 출근과 퇴근을 기록해 보세요. 로그인 상태는 같은 단말에서 최대 1년 유지됩니다.
+            {getDisplayLocationName(attendanceMeta, companySetting)} 출퇴근 서비스입니다. 로그인 후 브라우저에서 현재 위치를 확인하고 출근과 퇴근을 기록해 보세요. 로그인 상태는 같은 단말에서 최대 1년 유지됩니다.
           </Text>
           {errorMessage ? (
             <View style={styles.authErrorBox}>
@@ -877,7 +896,7 @@ export default function App() {
             {auth.user.employeeCode} · 오늘 출근 {formatTime(attendance.checkedInAt)} / 퇴근 {formatTime(attendance.checkedOutAt)}
           </Text>
           <Text style={styles.companyText}>
-            {attendanceMeta.companyName || COMPANY_NAME} 반경 {companySetting.allowedRadiusMeters}m
+            {getDisplayLocationName(attendanceMeta, companySetting)} 반경 {companySetting.allowedRadiusMeters}m
           </Text>
         </View>
         <View style={styles.badge}>
@@ -927,7 +946,7 @@ export default function App() {
               latitudeDelta: COMPANY_LOCATION.latitudeDelta,
               longitudeDelta: COMPANY_LOCATION.longitudeDelta,
             }}
-            companyName={attendanceMeta.companyName || COMPANY_NAME}
+            companyName={getDisplayLocationName(attendanceMeta, companySetting)}
             companyRadiusMeters={companySetting.allowedRadiusMeters}
             currentLocation={currentLocation}
             style={styles.map}

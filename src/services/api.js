@@ -51,6 +51,7 @@ function getUserPayload(data, employeeCode) {
     name: data?.employeeName || "사용자",
     employeeCode,
     companyName: data?.companyName,
+    workplaceName: data?.workplaceName || null,
     role: data?.role,
     passwordChangeRequired: Boolean(data?.passwordChangeRequired),
   };
@@ -68,6 +69,7 @@ function normalizeTodayAttendance(data) {
     attendanceDate: data?.attendanceDate || null,
     status: data?.status || null,
     companyName: data?.companyName || null,
+    workplaceName: data?.workplaceName || null,
   };
 }
 
@@ -79,6 +81,8 @@ function normalizeCompanySetting(data) {
   return {
     companyId: data.companyId,
     companyName: data.companyName,
+    workplaceId: data.workplaceId || null,
+    workplaceName: data.workplaceName || null,
     latitude: data.latitude,
     longitude: data.longitude,
     allowedRadiusMeters: data.allowedRadiusMeters,
@@ -102,6 +106,7 @@ export async function login({ employeeCode, password, deviceId, deviceName }) {
         name: employeeCode === "ADMIN001" ? "관리자" : "홍길동",
         employeeCode,
         companyName: "OpenAI Seoul Office",
+        workplaceName: null,
         role: employeeCode === "ADMIN001" ? "ADMIN" : "EMPLOYEE",
         passwordChangeRequired: false,
       },
@@ -176,6 +181,8 @@ export async function getCompanySetting({ token }) {
     return normalizeCompanySetting({
       companyId: 1,
       companyName: "OpenAI Seoul Office",
+      workplaceId: null,
+      workplaceName: null,
       latitude: 37.5665,
       longitude: 126.978,
       allowedRadiusMeters: 100,
@@ -201,6 +208,8 @@ export async function getPublicCompanySetting() {
     return normalizeCompanySetting({
       companyId: 1,
       companyName: "OpenAI Seoul Office",
+      workplaceId: null,
+      workplaceName: null,
       latitude: 37.5665,
       longitude: 126.978,
       allowedRadiusMeters: 100,
