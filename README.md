@@ -119,3 +119,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\deploy-prod.ps1 -ApiBaseUrl "
 
 - `mobile-web.out.log`
 - `mobile-web.err.log`
+
+### GitHub Self-Hosted Runner 배포
+
+미니PC를 GitHub self-hosted runner 로 등록했다면 GitHub 웹 UI에서 바로 배포할 수 있습니다.
+
+- workflow: [deploy-self-hosted.yml](/Users/hyeonseobkim/workspace/attendance-app/mobile/.github/workflows/deploy-self-hosted.yml)
+- 가이드: [GITHUB_SELF_HOSTED_DEPLOYMENT.md](/Users/hyeonseobkim/workspace/attendance-app/mobile/docs/GITHUB_SELF_HOSTED_DEPLOYMENT.md)
