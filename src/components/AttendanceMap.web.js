@@ -79,9 +79,20 @@ export default function AttendanceMap({
   currentLocation,
   style,
 }) {
+  const distanceToCompany = currentLocation
+    ? getDistanceInMeters(currentLocation, companyLocation)
+    : null;
   const shouldUseCompactCurrentLocation =
     currentLocation &&
-    getDistanceInMeters(currentLocation, companyLocation) < 20;
+    distanceToCompany < 20;
+  const isInsideCompanyRadius =
+    distanceToCompany == null || distanceToCompany <= companyRadiusMeters;
+  const circleColor = isInsideCompanyRadius
+    ? "rgba(20, 99, 255, 0.55)"
+    : "rgba(220, 38, 38, 0.75)";
+  const circleFillColor = isInsideCompanyRadius
+    ? "rgba(20, 99, 255, 0.12)"
+    : "rgba(220, 38, 38, 0.10)";
 
   return (
     <View style={[styles.wrapper, style]}>
@@ -98,8 +109,8 @@ export default function AttendanceMap({
         />
         <Circle
           center={[companyLocation.latitude, companyLocation.longitude]}
-          fillColor="rgba(20, 99, 255, 0.12)"
-          pathOptions={{ color: "rgba(20, 99, 255, 0.55)", weight: 2 }}
+          fillColor={circleFillColor}
+          pathOptions={{ color: circleColor, weight: 2.5 }}
           radius={companyRadiusMeters}
         />
         <Marker
