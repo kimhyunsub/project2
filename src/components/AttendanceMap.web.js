@@ -42,19 +42,6 @@ const currentLocationIcon = new L.DivIcon({
   iconAnchor: [17, 17],
 });
 
-const currentLocationDotIcon = new L.DivIcon({
-  className: "current-location-dot-marker",
-  html: `
-    <div style="position:relative;width:34px;height:34px;">
-      <div style="position:absolute;inset:0;border-radius:999px;background:rgba(20,99,255,.16);"></div>
-      <div style="position:absolute;left:5px;top:5px;width:24px;height:24px;border-radius:999px;background:rgba(20,99,255,.20);"></div>
-      <div style="position:absolute;left:9px;top:9px;width:16px;height:16px;border-radius:999px;background:#1463ff;border:3px solid #ffffff;box-sizing:border-box;box-shadow:0 6px 14px rgba(20,99,255,.28);"></div>
-    </div>
-  `,
-  iconSize: [34, 34],
-  iconAnchor: [17, 17],
-});
-
 function MapViewport({ companyLocation, currentLocation }) {
   const map = useMap();
 
@@ -141,7 +128,7 @@ export default function AttendanceMap({
         {currentLocation ? (
           <Pane name="current-location-pane" style={{ zIndex: 650 }}>
             <Marker
-              icon={shouldUseCompactCurrentLocation ? currentLocationDotIcon : currentLocationIcon}
+              icon={currentLocationIcon}
               position={[displayedCurrentLocation.latitude, displayedCurrentLocation.longitude]}
             >
               <Popup>현재 위치</Popup>
