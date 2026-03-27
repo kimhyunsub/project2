@@ -45,14 +45,14 @@ const currentLocationIcon = new L.DivIcon({
 const currentLocationDotIcon = new L.DivIcon({
   className: "current-location-dot-marker",
   html: `
-    <div style="position:relative;width:24px;height:24px;">
-      <div style="position:absolute;inset:0;border-radius:999px;background:rgba(20,99,255,.18);"></div>
-      <div style="position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:999px;background:rgba(20,99,255,.24);"></div>
-      <div style="position:absolute;left:7px;top:7px;width:10px;height:10px;border-radius:999px;background:#1463ff;border:3px solid #ffffff;box-sizing:border-box;"></div>
+    <div style="position:relative;width:34px;height:34px;">
+      <div style="position:absolute;inset:0;border-radius:999px;background:rgba(20,99,255,.16);"></div>
+      <div style="position:absolute;left:5px;top:5px;width:24px;height:24px;border-radius:999px;background:rgba(20,99,255,.20);"></div>
+      <div style="position:absolute;left:9px;top:9px;width:16px;height:16px;border-radius:999px;background:#1463ff;border:3px solid #ffffff;box-sizing:border-box;box-shadow:0 6px 14px rgba(20,99,255,.28);"></div>
     </div>
   `,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
 });
 
 function MapViewport({ companyLocation, currentLocation }) {
@@ -93,10 +93,10 @@ export default function AttendanceMap({
     : null;
   const shouldUseCompactCurrentLocation =
     currentLocation &&
-    distanceToCompany < 40;
+    distanceToCompany < 90;
   const displayedCurrentLocation =
     currentLocation && shouldUseCompactCurrentLocation
-      ? offsetCoordinate(currentLocation, 12, 18)
+      ? offsetCoordinate(currentLocation, 32, 48)
       : currentLocation;
   const isInsideCompanyRadius =
     distanceToCompany == null || distanceToCompany <= companyRadiusMeters;
