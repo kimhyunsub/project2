@@ -912,6 +912,17 @@ export default function App() {
         </View>
       </View>
 
+      <View style={styles.attendanceSummaryRow}>
+        <View style={styles.attendanceSummaryCard}>
+          <Text style={styles.attendanceSummaryLabel}>출근</Text>
+          <Text style={styles.attendanceSummaryValue}>{formatTime(attendance.checkedInAt)}</Text>
+        </View>
+        <View style={styles.attendanceSummaryCard}>
+          <Text style={styles.attendanceSummaryLabel}>퇴근</Text>
+          <Text style={styles.attendanceSummaryValue}>{formatTime(attendance.checkedOutAt)}</Text>
+        </View>
+      </View>
+
       <View style={styles.mapCard}>
         {loadingLocation ? (
           <View style={styles.centerState}>
@@ -955,17 +966,6 @@ export default function App() {
       </View>
 
       <View style={styles.bottomPanel}>
-        <View style={styles.attendanceSummaryRow}>
-          <View style={styles.attendanceSummaryCard}>
-            <Text style={styles.attendanceSummaryLabel}>출근</Text>
-            <Text style={styles.attendanceSummaryValue}>{formatTime(attendance.checkedInAt)}</Text>
-          </View>
-          <View style={styles.attendanceSummaryCard}>
-            <Text style={styles.attendanceSummaryLabel}>퇴근</Text>
-            <Text style={styles.attendanceSummaryValue}>{formatTime(attendance.checkedOutAt)}</Text>
-          </View>
-        </View>
-
         <Text style={styles.panelTitle}>공지사항</Text>
         {noticeBlocks.length > 0 ? (
           <View style={styles.noticeContent}>
@@ -1143,7 +1143,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 16,
+    paddingBottom: 12,
   },
   welcomeText: {
     color: "#172033",
@@ -1231,32 +1231,33 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 24,
+    paddingTop: 16,
+    paddingBottom: 22,
   },
   attendanceSummaryRow: {
     flexDirection: "row",
-    gap: 12,
-    marginBottom: 18,
+    gap: 10,
+    marginHorizontal: 20,
+    marginBottom: 14,
   },
   attendanceSummaryCard: {
     flex: 1,
     backgroundColor: "#f4f7fb",
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
     borderWidth: 1,
     borderColor: "#dbe4f0",
   },
   attendanceSummaryLabel: {
     color: "#6a7487",
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "700",
-    marginBottom: 6,
+    marginBottom: 4,
   },
   attendanceSummaryValue: {
     color: "#172033",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "800",
     letterSpacing: -0.2,
   },
